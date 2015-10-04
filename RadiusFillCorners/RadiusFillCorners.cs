@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
-using System.Windows;
 using System.Drawing;
-using Microsoft.Win32;
 using System.Reflection;
-using System.Drawing.Text;
-using System.Windows.Forms;
 using System.Windows.Media;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using PaintDotNet;
-using PaintDotNet.Data;
 using PaintDotNet.Effects;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
@@ -116,16 +108,8 @@ namespace RadiusFillCornersEffect
         {
             double width = base.EnvironmentParameters.SourceSurface.Width;
             double height = base.EnvironmentParameters.SourceSurface.Height;
-            int radiusMax = 0;
-            if (height > width)
-            {
-                radiusMax = (int)Math.Ceiling((double)(width / 2.0));
-            }
-            else
-            {
-                radiusMax = (int)Math.Ceiling((double)(height / 2.0));
-            }
-            int radiusDefault = (radiusMax / 2);
+            int radiusMax = (height > width) ? (int)Math.Ceiling(width / 2.0) : (int)Math.Ceiling(height / 2.0);
+            int radiusDefault = radiusMax / 2;
 
             List<Property> props = new List<Property>();
 
@@ -175,7 +159,6 @@ namespace RadiusFillCornersEffect
             }
         }
 
-
         private int radiusValue = 0;
         private int rectangleTopCoordinate = 0;
         private int rectangleBottomCoordinate = 0;
@@ -185,9 +168,9 @@ namespace RadiusFillCornersEffect
         private bool PointWithinRadius(System.Windows.Point pointToTest, double radiusAA)
         {
             // determine if point's x and y coordinates are within the area that we want to modify 
-            if (pointToTest.X > this.rectangleLeftCoordinate && pointToTest.X < this.rectangleRightCoordinate)
+            if (pointToTest.X > rectangleLeftCoordinate && pointToTest.X < rectangleRightCoordinate)
                 return false;
-            if (pointToTest.Y > this.rectangleTopCoordinate && pointToTest.Y < this.rectangleBottomCoordinate)
+            if (pointToTest.Y > rectangleTopCoordinate && pointToTest.Y < rectangleBottomCoordinate)
                 return false;
 
             // create geometry objects for testing
@@ -195,36 +178,36 @@ namespace RadiusFillCornersEffect
             EllipseGeometry circle = new EllipseGeometry();
 
             // update circle's values
-            circle.RadiusX = (double)this.radiusValue + radiusAA;
-            circle.RadiusY = (double)this.radiusValue + radiusAA;
+            circle.RadiusX = (double)radiusValue + radiusAA;
+            circle.RadiusY = (double)radiusValue + radiusAA;
 
             // create 4 center points that will be used to draw circles
-            circleCenter.X = this.rectangleLeftCoordinate;
-            circleCenter.Y = this.rectangleTopCoordinate;
+            circleCenter.X = rectangleLeftCoordinate;
+            circleCenter.Y = rectangleTopCoordinate;
             circle.Center = circleCenter;
 
             // check to see if our test point is contained with the current circle
             if (circle.FillContains(pointToTest)) return false;
 
             // update circle's values
-            circleCenter.X = this.rectangleRightCoordinate;
-            circleCenter.Y = this.rectangleTopCoordinate;
+            circleCenter.X = rectangleRightCoordinate;
+            circleCenter.Y = rectangleTopCoordinate;
             circle.Center = circleCenter;
 
             // check to see if our test point is contained with the current circle
             if (circle.FillContains(pointToTest)) return false;
 
             // update circle's values
-            circleCenter.X = this.rectangleLeftCoordinate;
-            circleCenter.Y = this.rectangleBottomCoordinate;
+            circleCenter.X = rectangleLeftCoordinate;
+            circleCenter.Y = rectangleBottomCoordinate;
             circle.Center = circleCenter;
 
             // check to see if our test point is contained with the current circle
             if (circle.FillContains(pointToTest)) return false;
 
             // update circle's values
-            circleCenter.X = this.rectangleRightCoordinate;
-            circleCenter.Y = this.rectangleBottomCoordinate;
+            circleCenter.X = rectangleRightCoordinate;
+            circleCenter.Y = rectangleBottomCoordinate;
             circle.Center = circleCenter;
 
             // check to see if our test point is contained with the current circle
@@ -251,12 +234,12 @@ namespace RadiusFillCornersEffect
             ColorBgra imageColor;
 
             // Get a dedicated transparent color
-            ColorBgra a0Color = new ColorBgra(); ;
+            ColorBgra a0Color = new ColorBgra();
             a0Color.A = 0;
 
             // update Background Fill based on checkbox
             ColorBgra fillColor = new ColorBgra();
-            if (Amount2 == true)
+            if (Amount2)
             {
                 fillColor.A = 0;
             }
@@ -268,56 +251,54 @@ namespace RadiusFillCornersEffect
             radiusValue = Amount1;
             Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt(); 
             // create a rectangle that will be used to determine how the pixels should be rendered
-            rectangleTopCoordinate = (int)selection.Top + radiusValue;
-            rectangleBottomCoordinate = (int)selection.Bottom - 1 - radiusValue;
-            rectangleLeftCoordinate = (int)selection.Left + radiusValue;
-            rectangleRightCoordinate = (int)selection.Right - 1 - radiusValue;
+            rectangleTopCoordinate = selection.Top + radiusValue;
+            rectangleBottomCoordinate = selection.Bottom - 1 - radiusValue;
+            rectangleLeftCoordinate = selection.Left + radiusValue;
+            rectangleRightCoordinate = selection.Right - 1 - radiusValue;
 
             // create point for testing how each pixel should be colored
             System.Windows.Point pointToTest = new System.Windows.Point();
 
             for (int y = rect.Top; y < rect.Bottom; y++)
             {
+                if (IsCancelRequested) return;
                 for (int x = rect.Left; x < rect.Right; x++)
                 {
                     sourceColor = src[x, y];
                     imageColor = a0Color;
-                    
+
                     // update point's coordinates
                     pointToTest.X = x;
                     pointToTest.Y = y;
 
                     // if point is not within the corner use original source pixel
-                    if (!this.PointWithinRadius(pointToTest, 0))
+                    if (!PointWithinRadius(pointToTest, 0))
                     {
                         imageColor = sourceColor;
                     }
-                    else if (Amount4 == true)
+                    else if (Amount4)
                     {
-                        if (!this.PointWithinRadius(pointToTest, 0.333))
+                        if (!PointWithinRadius(pointToTest, 0.333))
                         {
                             imageColor = sourceColor;
-                            imageColor.A = (byte)(0.70 * sourceColor.A);
-
+                            imageColor.A = (byte)(0.7 * sourceColor.A);
                         }
-                        else if (!this.PointWithinRadius(pointToTest, 0.666))
+                        else if (!PointWithinRadius(pointToTest, 0.666))
                         {
                             imageColor = sourceColor;
                             imageColor.A = (byte)(0.4 * sourceColor.A);
-
                         }
-                        else if (!this.PointWithinRadius(pointToTest, 1))
+                        else if (!PointWithinRadius(pointToTest, 1))
                         {
                             imageColor = sourceColor;
                             imageColor.A = (byte)(0.2 * sourceColor.A);
-
                         }
                     }
 
                     dst[x, y] = normalOp.Apply(fillColor, imageColor);
                 }
             }
-        }        
+        }
         #endregion
     }
 }
