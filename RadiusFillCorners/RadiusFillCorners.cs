@@ -18,7 +18,7 @@ using PaintDotNet.PropertySystem;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
-[assembly: AssemblyVersion("1.3.*")]
+[assembly: AssemblyVersion("1.4.0.0")]
 
 namespace RadiusFillCornersEffect
 {
