@@ -164,7 +164,7 @@ namespace RadiusFillCornersEffect
         private int rectangleLeftCoordinate = 0;
         private int rectangleRightCoordinate = 0;
 
-        private bool PointWithinRadius(System.Windows.Point pointToTest, double radiusAA)
+        private bool PointOutsideRadius(System.Windows.Point pointToTest, double radiusAA)
         {
             // determine if point's x and y coordinates are within the area that we want to modify 
             if (pointToTest.X > rectangleLeftCoordinate && pointToTest.X < rectangleRightCoordinate)
@@ -259,22 +259,22 @@ namespace RadiusFillCornersEffect
                     pointToTest.X = x;
                     pointToTest.Y = y;
 
-                    // if point is not within the corner use original source pixel Alpha value
-                    if (!PointWithinRadius(pointToTest, 0))
+                    // if point is Not outside of the radius, use original source pixel Alpha value
+                    if (!PointOutsideRadius(pointToTest, 0))
                     {
                         imageColor.A = sourceColor.A;
                     }
                     else if (Amount4)
                     {
-                        if (!PointWithinRadius(pointToTest, 0.333))
+                        if (!PointOutsideRadius(pointToTest, 0.333))
                         {
                             imageColor.A = (byte)(0.7 * sourceColor.A);
                         }
-                        else if (!PointWithinRadius(pointToTest, 0.666))
+                        else if (!PointOutsideRadius(pointToTest, 0.666))
                         {
                             imageColor.A = (byte)(0.4 * sourceColor.A);
                         }
-                        else if (!PointWithinRadius(pointToTest, 1))
+                        else if (!PointOutsideRadius(pointToTest, 1))
                         {
                             imageColor.A = (byte)(0.2 * sourceColor.A);
                         }
