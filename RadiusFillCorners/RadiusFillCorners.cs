@@ -229,23 +229,10 @@ namespace RadiusFillCornersEffect
         void Render(Surface dst, Surface src, Rectangle rect)
         {
             ColorBgra sourceColor;
-
             ColorBgra imageColor;
-
-            // Get a dedicated transparent color
-            ColorBgra a0Color = new ColorBgra();
-            a0Color.A = 0;
-
-            // update Background Fill based on checkbox
-            ColorBgra fillColor = new ColorBgra();
+            ColorBgra fillColor = Amount3;
             if (Amount2)
-            {
                 fillColor.A = 0;
-            }
-            else
-            {
-                fillColor = Amount3;
-            }
 
             radiusValue = Amount1;
             Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt(); 
@@ -264,32 +251,31 @@ namespace RadiusFillCornersEffect
                 for (int x = rect.Left; x < rect.Right; x++)
                 {
                     sourceColor = src[x, y];
-                    imageColor = a0Color;
+
+                    imageColor = sourceColor;
+                    imageColor.A = 0;
 
                     // update point's coordinates
                     pointToTest.X = x;
                     pointToTest.Y = y;
 
-                    // if point is not within the corner use original source pixel
+                    // if point is not within the corner use original source pixel Alpha value
                     if (!PointWithinRadius(pointToTest, 0))
                     {
-                        imageColor = sourceColor;
+                        imageColor.A = sourceColor.A;
                     }
                     else if (Amount4)
                     {
                         if (!PointWithinRadius(pointToTest, 0.333))
                         {
-                            imageColor = sourceColor;
                             imageColor.A = (byte)(0.7 * sourceColor.A);
                         }
                         else if (!PointWithinRadius(pointToTest, 0.666))
                         {
-                            imageColor = sourceColor;
                             imageColor.A = (byte)(0.4 * sourceColor.A);
                         }
                         else if (!PointWithinRadius(pointToTest, 1))
                         {
-                            imageColor = sourceColor;
                             imageColor.A = (byte)(0.2 * sourceColor.A);
                         }
                     }
