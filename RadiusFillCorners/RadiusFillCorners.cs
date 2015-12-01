@@ -149,7 +149,7 @@ namespace RadiusFillCornersEffect
             base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
         }
 
-        protected override unsafe void OnRender(Rectangle[] rois, int startIndex, int length)
+        protected override void OnRender(Rectangle[] rois, int startIndex, int length)
         {
             if (length == 0) return;
             for (int i = startIndex; i < startIndex + length; ++i)
