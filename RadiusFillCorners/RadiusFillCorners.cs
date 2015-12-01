@@ -119,9 +119,9 @@ namespace RadiusFillCornersEffect
 
             List<PropertyCollectionRule> propRules = new List<PropertyCollectionRule>();
 
-            propRules.Add(new ReadOnlyBoundToBooleanRule(PropertyNames.Amount3, PropertyNames.Amount2, false)); 
+            propRules.Add(new ReadOnlyBoundToBooleanRule(PropertyNames.Amount3, PropertyNames.Amount2, false));
 
-            return new PropertyCollection(props, propRules); 
+            return new PropertyCollection(props, propRules);
         }
 
         protected override ControlInfo OnCreateConfigUI(PropertyCollection props)
@@ -235,7 +235,7 @@ namespace RadiusFillCornersEffect
                 fillColor.A = 0;
 
             radiusValue = Amount1;
-            Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt(); 
+            Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt();
             // create a rectangle that will be used to determine how the pixels should be rendered
             rectangleTopCoordinate = selection.Top + radiusValue;
             rectangleBottomCoordinate = selection.Bottom - 1 - radiusValue;
