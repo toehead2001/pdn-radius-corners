@@ -108,7 +108,7 @@ namespace RadiusFillCornersEffect
         protected override PropertyCollection OnCreatePropertyCollection()
         {
             Rectangle selection = EnvironmentParameters.GetSelection(EnvironmentParameters.SourceSurface.Bounds).GetBoundsInt();
-            int radiusMax = (selection.Height > selection.Width) ? (int)Math.Ceiling(selection.Width / 2.0) : (int)Math.Ceiling(selection.Height / 2.0);
+            int radiusMax = Math.Min(selection.Width, selection.Height) / 2;
             int radiusDefault = radiusMax / 2;
 
             List<Property> props = new List<Property>();
@@ -153,12 +153,12 @@ namespace RadiusFillCornersEffect
             base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
         }
 
-        protected override void OnRender(Rectangle[] rois, int startIndex, int length)
+        protected override void OnRender(Rectangle[] renderRects, int startIndex, int length)
         {
             if (length == 0) return;
             for (int i = startIndex; i < startIndex + length; ++i)
             {
-                Render(DstArgs.Surface, SrcArgs.Surface, rois[i]);
+                Render(DstArgs.Surface, SrcArgs.Surface, renderRects[i]);
             }
         }
 
