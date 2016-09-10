@@ -101,7 +101,8 @@ namespace RadiusFillCornersEffect
             Amount1,
             Amount2,
             Amount3,
-            Amount4
+            Amount4,
+            Amount5
         }
 
         protected override PropertyCollection OnCreatePropertyCollection()
@@ -113,6 +114,7 @@ namespace RadiusFillCornersEffect
             List<Property> props = new List<Property>();
 
             props.Add(new Int32Property(PropertyNames.Amount1, radiusDefault, 1, radiusMax));
+            props.Add(new Int32Property(PropertyNames.Amount5, 0, 0, radiusMax));
             props.Add(new BooleanProperty(PropertyNames.Amount2, true));
             props.Add(new Int32Property(PropertyNames.Amount3, ColorBgra.ToOpaqueInt32(ColorBgra.FromBgra(EnvironmentParameters.PrimaryColor.B, EnvironmentParameters.PrimaryColor.G, EnvironmentParameters.PrimaryColor.R, 255)), 0, 0xffffff));
             props.Add(new BooleanProperty(PropertyNames.Amount4, true));
@@ -135,6 +137,7 @@ namespace RadiusFillCornersEffect
             configUI.SetPropertyControlType(PropertyNames.Amount3, PropertyControlType.ColorWheel);
             configUI.SetPropertyControlValue(PropertyNames.Amount4, ControlInfoPropertyNames.DisplayName, string.Empty);
             configUI.SetPropertyControlValue(PropertyNames.Amount4, ControlInfoPropertyNames.Description, "Anti-aliasing");
+            configUI.SetPropertyControlValue(PropertyNames.Amount5, ControlInfoPropertyNames.DisplayName, "Margin");
 
             return configUI;
         }
@@ -145,6 +148,7 @@ namespace RadiusFillCornersEffect
             this.Amount2 = newToken.GetProperty<BooleanProperty>(PropertyNames.Amount2).Value;
             this.Amount3 = ColorBgra.FromOpaqueInt32(newToken.GetProperty<Int32Property>(PropertyNames.Amount3).Value);
             this.Amount4 = newToken.GetProperty<BooleanProperty>(PropertyNames.Amount4).Value;
+            this.Amount5 = newToken.GetProperty<Int32Property>(PropertyNames.Amount5).Value;
 
             base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
         }
@@ -222,25 +226,28 @@ namespace RadiusFillCornersEffect
         bool Amount2 = true; // [0,1] Transparent
         ColorBgra Amount3 = ColorBgra.FromBgr(0, 0, 0); // 
         bool Amount4 = true; // [0,1] Anti-aliasing
+        int Amount5 = 0; // Margin
         #endregion
 
         private BinaryPixelOp normalOp = LayerBlendModeUtil.CreateCompositionOp(LayerBlendMode.Normal);
 
         void Render(Surface dst, Surface src, Rectangle rect)
         {
+            Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt();
             ColorBgra sourceColor;
             ColorBgra imageColor;
             ColorBgra fillColor = Amount3;
             if (Amount2)
                 fillColor.A = 0;
+            int margin = Amount5;
+            int radiusMax = Math.Min(selection.Width, selection.Height) / 2 - margin;
+            radiusValue = (Amount1 > radiusMax) ? radiusMax : Amount1;
 
-            radiusValue = Amount1;
-            Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt();
             // create a rectangle that will be used to determine how the pixels should be rendered
-            rectangleTopCoordinate = selection.Top + radiusValue;
-            rectangleBottomCoordinate = selection.Bottom - 1 - radiusValue;
-            rectangleLeftCoordinate = selection.Left + radiusValue;
-            rectangleRightCoordinate = selection.Right - 1 - radiusValue;
+            rectangleTopCoordinate = selection.Top + margin + radiusValue;
+            rectangleBottomCoordinate = selection.Bottom - margin - 1 - radiusValue;
+            rectangleLeftCoordinate = selection.Left + margin + radiusValue;
+            rectangleRightCoordinate = selection.Right- margin - 1 - radiusValue;
 
             // create point for testing how each pixel should be colored
             System.Windows.Point pointToTest = new System.Windows.Point();
@@ -279,6 +286,10 @@ namespace RadiusFillCornersEffect
                             imageColor.A = (byte)(0.2 * sourceColor.A);
                         }
                     }
+
+                    // Trim the margins
+                    if (margin > 0 && (x < selection.Left + margin || x > selection.Right - margin - 1 || y < selection.Top + margin || y > selection.Bottom - margin - 1))
+                        imageColor.A = 0;
 
                     dst[x, y] = normalOp.Apply(fillColor, imageColor);
                 }
