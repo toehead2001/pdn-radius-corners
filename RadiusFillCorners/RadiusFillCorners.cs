@@ -53,7 +53,7 @@ namespace RadiusFillCornersEffect
 
         protected override PropertyCollection OnCreatePropertyCollection()
         {
-            Rectangle selection = EnvironmentParameters.GetSelection(EnvironmentParameters.SourceSurface.Bounds).GetBoundsInt();
+            Size selection = EnvironmentParameters.GetSelection(EnvironmentParameters.SourceSurface.Bounds).GetBoundsInt().Size;
             int radiusMax = Math.Min(selection.Width, selection.Height) / 2;
             int radiusDefault = radiusMax / 2;
 
@@ -168,16 +168,13 @@ namespace RadiusFillCornersEffect
             return true;
         }
 
-        #region User Entered Code
-        #region UICode
         int Amount1 = 3; // [1,500] Radius
         bool Amount2 = true; // [0,1] Transparent
         ColorBgra Amount3 = ColorBgra.FromBgr(0, 0, 0); // 
         bool Amount4 = true; // [0,1] Anti-aliasing
         int Amount5 = 0; // Margin
-        #endregion
 
-        private BinaryPixelOp normalOp = LayerBlendModeUtil.CreateCompositionOp(LayerBlendMode.Normal);
+        private readonly BinaryPixelOp normalOp = LayerBlendModeUtil.CreateCompositionOp(LayerBlendMode.Normal);
 
         void Render(Surface dst, Surface src, Rectangle rect)
         {
@@ -247,6 +244,5 @@ namespace RadiusFillCornersEffect
                 }
             }
         }
-        #endregion
     }
 }
