@@ -182,8 +182,7 @@ namespace RadiusFillCornersEffect
         void Render(Surface dst, Surface src, Rectangle rect)
         {
             Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt();
-            ColorBgra sourceColor;
-            ColorBgra imageColor;
+            ColorBgra currentPixel;
             ColorBgra fillColor = Amount3;
             if (Amount2)
                 fillColor.A = 0;
@@ -205,41 +204,46 @@ namespace RadiusFillCornersEffect
                 if (IsCancelRequested) return;
                 for (int x = rect.Left; x < rect.Right; x++)
                 {
-                    sourceColor = src[x, y];
-
-                    imageColor = sourceColor;
-                    imageColor.A = 0;
-
                     // update point's coordinates
                     pointToTest.X = x;
                     pointToTest.Y = y;
 
+                    currentPixel = src[x, y];
+
                     // if point is Not outside of the radius, use original source pixel Alpha value
                     if (!PointOutsideRadius(pointToTest, 0))
                     {
-                        imageColor.A = sourceColor.A;
+                        // Do nothing. Alpha channel stays the same
                     }
                     else if (Amount4)
                     {
                         if (!PointOutsideRadius(pointToTest, 0.333))
                         {
-                            imageColor.A = (byte)(0.7 * sourceColor.A);
+                            currentPixel.A = (byte)(0.7 * currentPixel.A);
                         }
                         else if (!PointOutsideRadius(pointToTest, 0.666))
                         {
-                            imageColor.A = (byte)(0.4 * sourceColor.A);
+                            currentPixel.A = (byte)(0.4 * currentPixel.A);
                         }
                         else if (!PointOutsideRadius(pointToTest, 1))
                         {
-                            imageColor.A = (byte)(0.2 * sourceColor.A);
+                            currentPixel.A = (byte)(0.2 * currentPixel.A);
                         }
+                        else
+                        {
+                            currentPixel.A = byte.MinValue;
+                        }
+                    }
+                    else
+                    {
+                        currentPixel.A = byte.MinValue;
                     }
 
                     // Trim the margins
                     if (margin > 0 && (x < selection.Left + margin || x > selection.Right - margin - 1 || y < selection.Top + margin || y > selection.Bottom - margin - 1))
-                        imageColor.A = 0;
+                        currentPixel.A = byte.MinValue;
 
-                    dst[x, y] = normalOp.Apply(fillColor, imageColor);
+                    dst[x, y] = normalOp.Apply(fillColor, currentPixel);
                 }
             }
         }
