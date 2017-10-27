@@ -24,75 +24,21 @@ namespace RadiusFillCornersEffect
 {
     public class PluginSupportInfo : IPluginSupportInfo
     {
-        public string Author
-        {
-            get
-            {
-                return ((AssemblyCopyrightAttribute)base.GetType().Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright;
-            }
-        }
-        public string Copyright
-        {
-            get
-            {
-                return ((AssemblyDescriptionAttribute)base.GetType().Assembly.GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)[0]).Description;
-            }
-        }
-
-        public string DisplayName
-        {
-            get
-            {
-                return ((AssemblyProductAttribute)base.GetType().Assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0]).Product;
-            }
-        }
-
-        public Version Version
-        {
-            get
-            {
-                return base.GetType().Assembly.GetName().Version;
-            }
-        }
-
-        public Uri WebsiteUri
-        {
-            get
-            {
-                return new Uri("http://www.getpaint.net/redirect/plugins.html");
-            }
-        }
+        public string Author => ((AssemblyCopyrightAttribute)base.GetType().Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright;
+        public string Copyright => ((AssemblyDescriptionAttribute)base.GetType().Assembly.GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)[0]).Description;
+        public string DisplayName => ((AssemblyProductAttribute)base.GetType().Assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0]).Product;
+        public Version Version => base.GetType().Assembly.GetName().Version;
+        public Uri WebsiteUri => new Uri("http://www.getpaint.net/redirect/plugins.html");
     }
 
     [PluginSupportInfo(typeof(PluginSupportInfo), DisplayName = "Radius Corners")]
     public class RadiusFillCornersEffectPlugin : PropertyBasedEffect
     {
-        public static string StaticName
-        {
-            get
-            {
-                return "Radius Corners";
-            }
-        }
-
-        public static Image StaticIcon
-        {
-            get
-            {
-                return new Bitmap(typeof(RadiusFillCornersEffectPlugin), "RadiusFillCorners.png");
-            }
-        }
-
-        public static string SubmenuName
-        {
-            get
-            {
-                return SubmenuNames.Stylize;
-            }
-        }
+        private const string StaticName = "Radius Corners";
+        private static readonly Image StaticIcon = new Bitmap(typeof(RadiusFillCornersEffectPlugin), "RadiusFillCorners.png");
 
         public RadiusFillCornersEffectPlugin()
-            : base(StaticName, StaticIcon, SubmenuName, EffectFlags.Configurable)
+            : base(StaticName, StaticIcon, SubmenuNames.Stylize, EffectFlags.Configurable)
         {
         }
 
@@ -111,17 +57,19 @@ namespace RadiusFillCornersEffect
             int radiusMax = Math.Min(selection.Width, selection.Height) / 2;
             int radiusDefault = radiusMax / 2;
 
-            List<Property> props = new List<Property>();
+            List<Property> props = new List<Property>
+            {
+                new Int32Property(PropertyNames.Amount1, radiusDefault, 1, radiusMax),
+                new Int32Property(PropertyNames.Amount5, 0, 0, radiusMax),
+                new BooleanProperty(PropertyNames.Amount2, true),
+                new Int32Property(PropertyNames.Amount3, ColorBgra.ToOpaqueInt32(ColorBgra.FromBgra(EnvironmentParameters.PrimaryColor.B, EnvironmentParameters.PrimaryColor.G, EnvironmentParameters.PrimaryColor.R, 255)), 0, 0xffffff),
+                new BooleanProperty(PropertyNames.Amount4, true)
+            };
 
-            props.Add(new Int32Property(PropertyNames.Amount1, radiusDefault, 1, radiusMax));
-            props.Add(new Int32Property(PropertyNames.Amount5, 0, 0, radiusMax));
-            props.Add(new BooleanProperty(PropertyNames.Amount2, true));
-            props.Add(new Int32Property(PropertyNames.Amount3, ColorBgra.ToOpaqueInt32(ColorBgra.FromBgra(EnvironmentParameters.PrimaryColor.B, EnvironmentParameters.PrimaryColor.G, EnvironmentParameters.PrimaryColor.R, 255)), 0, 0xffffff));
-            props.Add(new BooleanProperty(PropertyNames.Amount4, true));
-
-            List<PropertyCollectionRule> propRules = new List<PropertyCollectionRule>();
-
-            propRules.Add(new ReadOnlyBoundToBooleanRule(PropertyNames.Amount3, PropertyNames.Amount2, false));
+            List<PropertyCollectionRule> propRules = new List<PropertyCollectionRule>
+            {
+                new ReadOnlyBoundToBooleanRule(PropertyNames.Amount3, PropertyNames.Amount2, false)
+            };
 
             return new PropertyCollection(props, propRules);
         }
