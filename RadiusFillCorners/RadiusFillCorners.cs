@@ -9,16 +9,16 @@ using PaintDotNet.Effects;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
 
-[assembly: AssemblyTitle("Radius Corners Plugin for Paint.NET")]
+[assembly: AssemblyTitle("Radius Corners plugin for paint.net")]
 [assembly: AssemblyDescription("Round off square corners")]
 [assembly: AssemblyConfiguration("radius|corners")]
-[assembly: AssemblyCompany("dan9298 & toe_head2001")]
+[assembly: AssemblyCompany("toe_head2001")]
 [assembly: AssemblyProduct("Radius Corners")]
-[assembly: AssemblyCopyright("Copyright © dan9298 & toe_head2001")]
+[assembly: AssemblyCopyright("Copyright © 2018 toe_head2001 & dan9298")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
-[assembly: AssemblyVersion("1.5.0.0")]
+[assembly: AssemblyVersion("1.6.0.0")]
 
 namespace RadiusFillCornersEffect
 {
