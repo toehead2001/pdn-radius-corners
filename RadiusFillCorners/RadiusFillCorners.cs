@@ -60,10 +60,10 @@ namespace RadiusFillCornersEffect
             List<Property> props = new List<Property>
             {
                 new Int32Property(PropertyNames.Amount1, radiusDefault, 1, radiusMax),
+                new BooleanProperty(PropertyNames.Amount4, true),
                 new Int32Property(PropertyNames.Amount5, 0, 0, radiusMax),
                 new BooleanProperty(PropertyNames.Amount2, true),
-                new Int32Property(PropertyNames.Amount3, ColorBgra.ToOpaqueInt32(ColorBgra.FromBgra(EnvironmentParameters.PrimaryColor.B, EnvironmentParameters.PrimaryColor.G, EnvironmentParameters.PrimaryColor.R, 255)), 0, 0xffffff),
-                new BooleanProperty(PropertyNames.Amount4, true)
+                new Int32Property(PropertyNames.Amount3, ColorBgra.ToOpaqueInt32(ColorBgra.FromBgra(EnvironmentParameters.PrimaryColor.B, EnvironmentParameters.PrimaryColor.G, EnvironmentParameters.PrimaryColor.R, 255)), 0, 0xffffff)
             };
 
             List<PropertyCollectionRule> propRules = new List<PropertyCollectionRule>
@@ -79,13 +79,17 @@ namespace RadiusFillCornersEffect
             ControlInfo configUI = CreateDefaultConfigUI(props);
 
             configUI.SetPropertyControlValue(PropertyNames.Amount1, ControlInfoPropertyNames.DisplayName, "Radius");
-            configUI.SetPropertyControlValue(PropertyNames.Amount2, ControlInfoPropertyNames.DisplayName, "Background Fill");
-            configUI.SetPropertyControlValue(PropertyNames.Amount2, ControlInfoPropertyNames.Description, "Transparent");
-            configUI.SetPropertyControlValue(PropertyNames.Amount3, ControlInfoPropertyNames.DisplayName, string.Empty);
-            configUI.SetPropertyControlType(PropertyNames.Amount3, PropertyControlType.ColorWheel);
+
             configUI.SetPropertyControlValue(PropertyNames.Amount4, ControlInfoPropertyNames.DisplayName, string.Empty);
             configUI.SetPropertyControlValue(PropertyNames.Amount4, ControlInfoPropertyNames.Description, "Anti-aliasing");
+
             configUI.SetPropertyControlValue(PropertyNames.Amount5, ControlInfoPropertyNames.DisplayName, "Margin");
+
+            configUI.SetPropertyControlValue(PropertyNames.Amount2, ControlInfoPropertyNames.DisplayName, "Background Fill");
+            configUI.SetPropertyControlValue(PropertyNames.Amount2, ControlInfoPropertyNames.Description, "Transparent");
+
+            configUI.SetPropertyControlValue(PropertyNames.Amount3, ControlInfoPropertyNames.DisplayName, string.Empty);
+            configUI.SetPropertyControlType(PropertyNames.Amount3, PropertyControlType.ColorWheel);
 
             return configUI;
         }
