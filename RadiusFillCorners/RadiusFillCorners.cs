@@ -183,15 +183,15 @@ namespace RadiusFillCornersEffect
             ColorBgra fillColor = Amount3;
             if (Amount2)
                 fillColor.A = 0;
-            int margin = Amount5;
-            int radiusMax = Math.Min(selection.Width, selection.Height) / 2 - margin;
+            Rectangle marginBounds = Rectangle.FromLTRB(selection.Left + Amount5, selection.Top + Amount5, selection.Right - Amount5, selection.Bottom - Amount5);
+            int radiusMax = Math.Min(selection.Width, selection.Height) / 2 - Amount5;
             radiusValue = (Amount1 > radiusMax) ? radiusMax : Amount1;
 
             // create a rectangle that will be used to determine how the pixels should be rendered
-            rectangleTopCoordinate = selection.Top + margin + radiusValue;
-            rectangleBottomCoordinate = selection.Bottom - margin - 1 - radiusValue;
-            rectangleLeftCoordinate = selection.Left + margin + radiusValue;
-            rectangleRightCoordinate = selection.Right- margin - 1 - radiusValue;
+            rectangleTopCoordinate = marginBounds.Top + radiusValue;
+            rectangleBottomCoordinate = marginBounds.Bottom - 1 - radiusValue;
+            rectangleLeftCoordinate = marginBounds.Left + radiusValue;
+            rectangleRightCoordinate = marginBounds.Right - 1 - radiusValue;
 
             // create point for testing how each pixel should be colored
             System.Windows.Point pointToTest = new System.Windows.Point();
@@ -207,8 +207,12 @@ namespace RadiusFillCornersEffect
 
                     currentPixel = src[x, y];
 
+                    if (!marginBounds.Contains(x, y))
+                    {
+                        currentPixel.A = byte.MinValue;
+                    }
                     // if point is Not outside of the radius, use original source pixel Alpha value
-                    if (!PointOutsideRadius(pointToTest, 0))
+                    else if (!PointOutsideRadius(pointToTest, 0))
                     {
                         // Do nothing. Alpha channel stays the same
                     }
@@ -235,10 +239,6 @@ namespace RadiusFillCornersEffect
                     {
                         currentPixel.A = byte.MinValue;
                     }
-
-                    // Trim the margins
-                    if (margin > 0 && (x < selection.Left + margin || x > selection.Right - margin - 1 || y < selection.Top + margin || y > selection.Bottom - margin - 1))
-                        currentPixel.A = byte.MinValue;
 
                     dst[x, y] = normalOp.Apply(fillColor, currentPixel);
                 }
