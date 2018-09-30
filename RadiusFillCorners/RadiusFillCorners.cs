@@ -34,11 +34,10 @@ namespace RadiusFillCornersEffect
     [PluginSupportInfo(typeof(PluginSupportInfo), DisplayName = "Radius Corners")]
     public class RadiusFillCornersEffectPlugin : PropertyBasedEffect
     {
-        private const string StaticName = "Radius Corners";
         private static readonly Image StaticIcon = new Bitmap(typeof(RadiusFillCornersEffectPlugin), "RadiusFillCorners.png");
 
         public RadiusFillCornersEffectPlugin()
-            : base(StaticName, StaticIcon, SubmenuNames.Stylize, EffectFlags.Configurable)
+            : base("Radius Corners", StaticIcon, SubmenuNames.Stylize, EffectFlags.Configurable)
         {
         }
 
@@ -172,15 +171,15 @@ namespace RadiusFillCornersEffect
             return true;
         }
 
-        int Amount1 = 3; // [1,500] Radius
-        bool Amount2 = true; // [0,1] Transparent
-        ColorBgra Amount3 = ColorBgra.FromBgr(0, 0, 0); // 
-        bool Amount4 = true; // [0,1] Anti-aliasing
-        int Amount5 = 0; // Margin
+        private int Amount1 = 3; // [1,500] Radius
+        private bool Amount2 = true; // [0,1] Transparent
+        private ColorBgra Amount3 = ColorBgra.FromBgr(0, 0, 0); // 
+        private bool Amount4 = true; // [0,1] Anti-aliasing
+        private int Amount5 = 0; // Margin
 
         private readonly BinaryPixelOp normalOp = LayerBlendModeUtil.CreateCompositionOp(LayerBlendMode.Normal);
 
-        void Render(Surface dst, Surface src, Rectangle rect)
+        private void Render(Surface dst, Surface src, Rectangle rect)
         {
             Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt();
             ColorBgra currentPixel;
