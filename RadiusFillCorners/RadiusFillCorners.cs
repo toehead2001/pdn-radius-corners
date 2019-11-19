@@ -37,7 +37,7 @@ namespace RadiusFillCornersEffect
         private static readonly Image StaticIcon = new Bitmap(typeof(RadiusFillCornersEffectPlugin), "RadiusFillCorners.png");
 
         public RadiusFillCornersEffectPlugin()
-            : base("Radius Corners", StaticIcon, SubmenuNames.Stylize, EffectFlags.Configurable)
+            : base("Radius Corners", StaticIcon, SubmenuNames.Stylize, new EffectOptions { Flags = EffectFlags.Configurable })
         {
         }
 
