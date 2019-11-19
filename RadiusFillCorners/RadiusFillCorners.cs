@@ -43,11 +43,11 @@ namespace RadiusFillCornersEffect
 
         private enum PropertyNames
         {
-            Amount1,
-            Amount2,
-            Amount3,
-            Amount4,
-            Amount5
+            Radius,
+            TransparentBack,
+            BackColor,
+            AntiAliasing,
+            Margin
         }
 
         protected override PropertyCollection OnCreatePropertyCollection()
@@ -58,16 +58,16 @@ namespace RadiusFillCornersEffect
 
             List<Property> props = new List<Property>
             {
-                new Int32Property(PropertyNames.Amount1, radiusDefault, 1, radiusMax),
-                new BooleanProperty(PropertyNames.Amount4, true),
-                new Int32Property(PropertyNames.Amount5, 0, 0, radiusMax),
-                new BooleanProperty(PropertyNames.Amount2, true),
-                new Int32Property(PropertyNames.Amount3, ColorBgra.ToOpaqueInt32(ColorBgra.FromBgra(EnvironmentParameters.PrimaryColor.B, EnvironmentParameters.PrimaryColor.G, EnvironmentParameters.PrimaryColor.R, 255)), 0, 0xffffff)
+                new Int32Property(PropertyNames.Radius, radiusDefault, 1, radiusMax),
+                new BooleanProperty(PropertyNames.AntiAliasing, true),
+                new Int32Property(PropertyNames.Margin, 0, 0, radiusMax),
+                new BooleanProperty(PropertyNames.TransparentBack, true),
+                new Int32Property(PropertyNames.BackColor, ColorBgra.ToOpaqueInt32(ColorBgra.FromBgra(EnvironmentParameters.PrimaryColor.B, EnvironmentParameters.PrimaryColor.G, EnvironmentParameters.PrimaryColor.R, 255)), 0, 0xffffff)
             };
 
             List<PropertyCollectionRule> propRules = new List<PropertyCollectionRule>
             {
-                new ReadOnlyBoundToBooleanRule(PropertyNames.Amount3, PropertyNames.Amount2, false)
+                new ReadOnlyBoundToBooleanRule(PropertyNames.BackColor, PropertyNames.TransparentBack, false)
             };
 
             return new PropertyCollection(props, propRules);
@@ -77,29 +77,29 @@ namespace RadiusFillCornersEffect
         {
             ControlInfo configUI = CreateDefaultConfigUI(props);
 
-            configUI.SetPropertyControlValue(PropertyNames.Amount1, ControlInfoPropertyNames.DisplayName, "Radius");
+            configUI.SetPropertyControlValue(PropertyNames.Radius, ControlInfoPropertyNames.DisplayName, "Radius");
 
-            configUI.SetPropertyControlValue(PropertyNames.Amount4, ControlInfoPropertyNames.DisplayName, string.Empty);
-            configUI.SetPropertyControlValue(PropertyNames.Amount4, ControlInfoPropertyNames.Description, "Anti-aliasing");
+            configUI.SetPropertyControlValue(PropertyNames.AntiAliasing, ControlInfoPropertyNames.DisplayName, string.Empty);
+            configUI.SetPropertyControlValue(PropertyNames.AntiAliasing, ControlInfoPropertyNames.Description, "Anti-aliasing");
 
-            configUI.SetPropertyControlValue(PropertyNames.Amount5, ControlInfoPropertyNames.DisplayName, "Margin");
+            configUI.SetPropertyControlValue(PropertyNames.Margin, ControlInfoPropertyNames.DisplayName, "Margin");
 
-            configUI.SetPropertyControlValue(PropertyNames.Amount2, ControlInfoPropertyNames.DisplayName, "Background Fill");
-            configUI.SetPropertyControlValue(PropertyNames.Amount2, ControlInfoPropertyNames.Description, "Transparent");
+            configUI.SetPropertyControlValue(PropertyNames.TransparentBack, ControlInfoPropertyNames.DisplayName, "Background Fill");
+            configUI.SetPropertyControlValue(PropertyNames.TransparentBack, ControlInfoPropertyNames.Description, "Transparent");
 
-            configUI.SetPropertyControlValue(PropertyNames.Amount3, ControlInfoPropertyNames.DisplayName, string.Empty);
-            configUI.SetPropertyControlType(PropertyNames.Amount3, PropertyControlType.ColorWheel);
+            configUI.SetPropertyControlValue(PropertyNames.BackColor, ControlInfoPropertyNames.DisplayName, string.Empty);
+            configUI.SetPropertyControlType(PropertyNames.BackColor, PropertyControlType.ColorWheel);
 
             return configUI;
         }
 
         protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken, RenderArgs dstArgs, RenderArgs srcArgs)
         {
-            this.Amount1 = newToken.GetProperty<Int32Property>(PropertyNames.Amount1).Value;
-            this.Amount2 = newToken.GetProperty<BooleanProperty>(PropertyNames.Amount2).Value;
-            this.Amount3 = ColorBgra.FromOpaqueInt32(newToken.GetProperty<Int32Property>(PropertyNames.Amount3).Value);
-            this.Amount4 = newToken.GetProperty<BooleanProperty>(PropertyNames.Amount4).Value;
-            this.Amount5 = newToken.GetProperty<Int32Property>(PropertyNames.Amount5).Value;
+            this.Amount1 = newToken.GetProperty<Int32Property>(PropertyNames.Radius).Value;
+            this.Amount2 = newToken.GetProperty<BooleanProperty>(PropertyNames.TransparentBack).Value;
+            this.Amount3 = ColorBgra.FromOpaqueInt32(newToken.GetProperty<Int32Property>(PropertyNames.BackColor).Value);
+            this.Amount4 = newToken.GetProperty<BooleanProperty>(PropertyNames.AntiAliasing).Value;
+            this.Amount5 = newToken.GetProperty<Int32Property>(PropertyNames.Margin).Value;
 
             base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
         }
