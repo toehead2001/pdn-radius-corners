@@ -34,6 +34,18 @@ namespace RadiusFillCornersEffect
     [PluginSupportInfo(typeof(PluginSupportInfo), DisplayName = "Radius Corners")]
     public class RadiusFillCornersEffectPlugin : PropertyBasedEffect
     {
+        private int radiusValue = 0;
+        private int rectangleTopCoordinate = 0;
+        private int rectangleBottomCoordinate = 0;
+        private int rectangleLeftCoordinate = 0;
+        private int rectangleRightCoordinate = 0;
+        private Rectangle marginBounds = Rectangle.Empty;
+        private ColorBgra backColor = ColorBgra.Zero;
+        private bool antiAlias = true;
+        private bool transparent = true;
+
+        private readonly BinaryPixelOp normalOp = LayerBlendModeUtil.CreateCompositionOp(LayerBlendMode.Normal);
+
         private static readonly Image StaticIcon = new Bitmap(typeof(RadiusFillCornersEffectPlugin), "RadiusFillCorners.png");
 
         public RadiusFillCornersEffectPlugin()
@@ -95,11 +107,23 @@ namespace RadiusFillCornersEffect
 
         protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken, RenderArgs dstArgs, RenderArgs srcArgs)
         {
-            this.Amount1 = newToken.GetProperty<Int32Property>(PropertyNames.Radius).Value;
-            this.Amount2 = newToken.GetProperty<BooleanProperty>(PropertyNames.TransparentBack).Value;
-            this.Amount3 = ColorBgra.FromOpaqueInt32(newToken.GetProperty<Int32Property>(PropertyNames.BackColor).Value);
-            this.Amount4 = newToken.GetProperty<BooleanProperty>(PropertyNames.AntiAliasing).Value;
-            this.Amount5 = newToken.GetProperty<Int32Property>(PropertyNames.Margin).Value;
+            this.antiAlias = newToken.GetProperty<BooleanProperty>(PropertyNames.AntiAliasing).Value;
+            this.transparent = newToken.GetProperty<BooleanProperty>(PropertyNames.TransparentBack).Value;
+            this.backColor = ColorBgra.FromOpaqueInt32(newToken.GetProperty<Int32Property>(PropertyNames.BackColor).Value);
+
+            int radius = newToken.GetProperty<Int32Property>(PropertyNames.Radius).Value;
+            int margin = newToken.GetProperty<Int32Property>(PropertyNames.Margin).Value;
+
+            Rectangle selection = EnvironmentParameters.GetSelection(srcArgs.Bounds).GetBoundsInt();
+            marginBounds = Rectangle.FromLTRB(selection.Left + margin, selection.Top + margin, selection.Right - margin, selection.Bottom - margin);
+            int radiusMax = Math.Min(selection.Width, selection.Height) / 2 - margin;
+            radiusValue = Math.Min(radius, radiusMax);
+
+            // create a rectangle that will be used to determine how the pixels should be rendered
+            this.rectangleTopCoordinate = this.marginBounds.Top + this.radiusValue;
+            this.rectangleBottomCoordinate = this.marginBounds.Bottom - 1 - this.radiusValue;
+            this.rectangleLeftCoordinate = this.marginBounds.Left + this.radiusValue;
+            this.rectangleRightCoordinate = this.marginBounds.Right - 1 - this.radiusValue;
 
             base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
         }
@@ -112,12 +136,6 @@ namespace RadiusFillCornersEffect
                 Render(DstArgs.Surface, SrcArgs.Surface, renderRects[i]);
             }
         }
-
-        private int radiusValue = 0;
-        private int rectangleTopCoordinate = 0;
-        private int rectangleBottomCoordinate = 0;
-        private int rectangleLeftCoordinate = 0;
-        private int rectangleRightCoordinate = 0;
 
         private bool PointOutsideRadius(System.Windows.Point pointToTest, double radiusAA)
         {
@@ -171,31 +189,9 @@ namespace RadiusFillCornersEffect
             return true;
         }
 
-        private int Amount1 = 3; // [1,500] Radius
-        private bool Amount2 = true; // [0,1] Transparent
-        private ColorBgra Amount3 = ColorBgra.FromBgr(0, 0, 0); // 
-        private bool Amount4 = true; // [0,1] Anti-aliasing
-        private int Amount5 = 0; // Margin
-
-        private readonly BinaryPixelOp normalOp = LayerBlendModeUtil.CreateCompositionOp(LayerBlendMode.Normal);
-
         private void Render(Surface dst, Surface src, Rectangle rect)
         {
-            Rectangle selection = EnvironmentParameters.GetSelection(src.Bounds).GetBoundsInt();
             ColorBgra currentPixel;
-            ColorBgra fillColor = Amount3;
-            if (Amount2)
-                fillColor.A = 0;
-            Rectangle marginBounds = Rectangle.FromLTRB(selection.Left + Amount5, selection.Top + Amount5, selection.Right - Amount5, selection.Bottom - Amount5);
-            int radiusMax = Math.Min(selection.Width, selection.Height) / 2 - Amount5;
-            radiusValue = (Amount1 > radiusMax) ? radiusMax : Amount1;
-
-            // create a rectangle that will be used to determine how the pixels should be rendered
-            rectangleTopCoordinate = marginBounds.Top + radiusValue;
-            rectangleBottomCoordinate = marginBounds.Bottom - 1 - radiusValue;
-            rectangleLeftCoordinate = marginBounds.Left + radiusValue;
-            rectangleRightCoordinate = marginBounds.Right - 1 - radiusValue;
-
             // create point for testing how each pixel should be colored
             System.Windows.Point pointToTest = new System.Windows.Point();
 
@@ -210,7 +206,7 @@ namespace RadiusFillCornersEffect
 
                     currentPixel = src[x, y];
 
-                    if (!marginBounds.Contains(x, y))
+                    if (!this.marginBounds.Contains(x, y))
                     {
                         currentPixel.A = byte.MinValue;
                     }
@@ -219,7 +215,7 @@ namespace RadiusFillCornersEffect
                     {
                         // Do nothing. Alpha channel stays the same
                     }
-                    else if (Amount4)
+                    else if (this.antiAlias)
                     {
                         if (!PointOutsideRadius(pointToTest, 0.333))
                         {
@@ -243,7 +239,7 @@ namespace RadiusFillCornersEffect
                         currentPixel.A = byte.MinValue;
                     }
 
-                    dst[x, y] = normalOp.Apply(fillColor, currentPixel);
+                    dst[x, y] = (this.transparent) ? currentPixel : normalOp.Apply(this.backColor, currentPixel);
                 }
             }
         }
