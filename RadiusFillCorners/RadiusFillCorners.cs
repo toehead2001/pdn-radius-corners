@@ -1,13 +1,13 @@
-﻿using System;
-using System.Drawing;
-using System.Reflection;
-using System.Windows.Media;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using PaintDotNet;
+﻿using PaintDotNet;
 using PaintDotNet.Effects;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Windows.Media;
 
 [assembly: AssemblyTitle("Radius Corners plugin for paint.net")]
 [assembly: AssemblyDescription("Round off square corners")]
@@ -64,20 +64,20 @@ namespace RadiusFillCornersEffect
 
         protected override PropertyCollection OnCreatePropertyCollection()
         {
-            Size selection = EnvironmentParameters.GetSelection(EnvironmentParameters.SourceSurface.Bounds).GetBoundsInt().Size;
+            Size selection = EnvironmentParameters.SelectionBounds.Size;
             int radiusMax = Math.Min(selection.Width, selection.Height) / 2;
             int radiusDefault = radiusMax / 2;
 
-            List<Property> props = new List<Property>
+            IEnumerable<Property> props = new Property[]
             {
                 new Int32Property(PropertyNames.Radius, radiusDefault, 1, radiusMax),
                 new BooleanProperty(PropertyNames.AntiAliasing, true),
                 new Int32Property(PropertyNames.Margin, 0, 0, radiusMax),
                 new BooleanProperty(PropertyNames.TransparentBack, true),
-                new Int32Property(PropertyNames.BackColor, ColorBgra.ToOpaqueInt32(ColorBgra.FromBgra(EnvironmentParameters.PrimaryColor.B, EnvironmentParameters.PrimaryColor.G, EnvironmentParameters.PrimaryColor.R, 255)), 0, 0xffffff)
+                new Int32Property(PropertyNames.BackColor, ColorBgra.ToOpaqueInt32(EnvironmentParameters.PrimaryColor.NewAlpha(byte.MaxValue)), 0, 0xffffff)
             };
 
-            List<PropertyCollectionRule> propRules = new List<PropertyCollectionRule>
+            IEnumerable<PropertyCollectionRule> propRules = new PropertyCollectionRule[]
             {
                 new ReadOnlyBoundToBooleanRule(PropertyNames.BackColor, PropertyNames.TransparentBack, false)
             };
@@ -114,7 +114,7 @@ namespace RadiusFillCornersEffect
             int radius = newToken.GetProperty<Int32Property>(PropertyNames.Radius).Value;
             int margin = newToken.GetProperty<Int32Property>(PropertyNames.Margin).Value;
 
-            Rectangle selection = EnvironmentParameters.GetSelection(srcArgs.Bounds).GetBoundsInt();
+            Rectangle selection = EnvironmentParameters.SelectionBounds;
             marginBounds = Rectangle.FromLTRB(selection.Left + margin, selection.Top + margin, selection.Right - margin, selection.Bottom - margin);
             int radiusMax = Math.Min(selection.Width, selection.Height) / 2 - margin;
             radiusValue = Math.Min(radius, radiusMax);
